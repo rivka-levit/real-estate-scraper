@@ -1,0 +1,10 @@
+services:
+  app:
+    build:
+      context: .
+    volumes:
+      - ./app:/app
+    ports:
+      - "80:80"
+    stdin_open: true
+    tty: true
