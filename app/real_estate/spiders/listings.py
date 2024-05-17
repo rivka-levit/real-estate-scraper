@@ -24,8 +24,15 @@ class ListingsSpider(scrapy.Spider):
                 'span[@class="si-listing__neighborhood-place"]/text()'
             ).getall()
             item['description'] = listing.xpath(
-                './/div[@class="si-listing__title-description"]/text()'
-            ).get()
+                './/div[@class="si-listing__info-label"]/text() | '
+                './/div[@class="si-listing__info-value"]/descendant::*/text()'
+            ).getall()
+
+            # Get rid of extra spaces
+            item['description'] = [
+                ''.join(x.split()) for x in item['description']
+            ]
+
             item['price'] = listing.xpath(
                 './/div[@class="si-listing__photo-price"]/span/text()'
             ).get()
