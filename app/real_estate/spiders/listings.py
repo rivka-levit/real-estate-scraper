@@ -19,16 +19,18 @@ class ListingsSpider(scrapy.Spider):
 
         for listing in gallery:
             item['name'] = listing.xpath(
-                '//div[@class="si-listing__title-main"]/text()'
-            ).get()
+                './/div[@class="si-listing__title-main"]/text() | '
+                './/div[@class="si-listing__neighborhood"]/'
+                'span[@class="si-listing__neighborhood-place"]/text()'
+            ).getall()
             item['description'] = listing.xpath(
-                '//div[@class="si-listing__title-description"]/text()'
+                './/div[@class="si-listing__title-description"]/text()'
             ).get()
             item['price'] = listing.xpath(
-                '//div[@class="si-listing__photo-price"]/span/text()'
+                './/div[@class="si-listing__photo-price"]/span/text()'
             ).get()
             item['agency'] = listing.xpath(
-                '//div[@class="si-listing__footer"]/div/text()'
+                './/div[@class="si-listing__footer"]/div/text()'
             ).get()
 
             yield item
