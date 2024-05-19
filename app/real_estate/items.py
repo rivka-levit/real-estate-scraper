@@ -5,7 +5,7 @@
 
 import scrapy
 
-from scrapy.loader.processors import MapCompose
+from scrapy.loader.processors import MapCompose, Join
 
 
 def description_in(descr):
@@ -45,10 +45,10 @@ def description_out(descr):
 
 
 class RealEstateItem(scrapy.Item):
-    name = scrapy.Field()
+    name = scrapy.Field(output_processor=Join())
     description = scrapy.Field(
         input_processor=MapCompose(description_in),
         output_processor=description_out
     )
-    price = scrapy.Field()
-    agency = scrapy.Field()
+    price = scrapy.Field(output_processor=Join())
+    agency = scrapy.Field(output_processor=Join())
