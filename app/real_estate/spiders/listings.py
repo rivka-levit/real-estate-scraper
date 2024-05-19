@@ -1,5 +1,7 @@
 import scrapy
 
+from scrapy.loader import ItemLoader
+
 from real_estate.items import RealEstateItem
 
 
@@ -15,29 +17,38 @@ class ListingsSpider(scrapy.Spider):
     def parse(self, response, **kwargs):
         gallery = response.xpath('//div[@class="si-listings-column"]')
 
-        item = RealEstateItem()
-
         for listing in gallery:
-            item['name'] = listing.xpath(
-                './/div[@class="si-listing__title-main"]/text() | '
+
+            item = ItemLoader(
+                item=RealEstateItem(),
+                response=response,
+                selector=listing
+            )
+
+            item.add_xpath(
+                'name',
+                './/div[@class="si-listing__title-main"]/text()'
+            )
+            item.add_xpath(
+                'name',
                 './/div[@class="si-listing__neighborhood"]/'
                 'span[@class="si-listing__neighborhood-place"]/text()'
-            ).getall()
-            item['description'] = listing.xpath(
-                './/div[@class="si-listing__info-label"]/text() | '
+            )
+            item.add_xpath(
+                'description',
+                './/div[@class="si-listing__info-label"]/text()'
+            )
+            item.add_xpath(
+                'description',
                 './/div[@class="si-listing__info-value"]/descendant::*/text()'
-            ).getall()
-
-            # Get rid of extra spaces
-            item['description'] = [
-                ''.join(x.split()) for x in item['description']
-            ]
-
-            item['price'] = listing.xpath(
+            )
+            item.add_xpath(
+                'price',
                 './/div[@class="si-listing__photo-price"]/span/text()'
-            ).get()
-            item['agency'] = listing.xpath(
+            )
+            item.add_xpath(
+                'agency',
                 './/div[@class="si-listing__footer"]/div/text()'
-            ).get()
+            )
 
-            yield item
+            yield item.load_item()
