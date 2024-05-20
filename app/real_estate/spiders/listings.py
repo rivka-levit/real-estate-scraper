@@ -1,18 +1,27 @@
-import scrapy
-
 from scrapy.loader import ItemLoader
+from scrapy.spiders import CrawlSpider, Rule
+from scrapy.linkextractors import LinkExtractor
 
 from real_estate.items import RealEstateItem
 
 
-class ListingsSpider(scrapy.Spider):
+class ListingsSpider(CrawlSpider):
     name = "listings"
     allowed_domains = ["www.arizonarealestate.com"]
     start_urls = [
-        "https://www.arizonarealestate.com/maricopa",
-        "https://www.arizonarealestate.com/goodyear",
-        "https://www.arizonarealestate.com/tempe"
+        "https://www.arizonarealestate.com/"
     ]
+    rules = (
+        Rule(
+            LinkExtractor(
+                restrict_xpaths=(
+                    '//section[contains(@class, "communities")]',
+                )
+            ),
+            callback='parse',
+            follow=True
+        ),
+    )
 
     def parse(self, response, **kwargs):
         gallery = response.xpath('//div[@class="si-listings-column"]')
@@ -52,3 +61,10 @@ class ListingsSpider(scrapy.Spider):
             )
 
             yield item.load_item()
+
+        next_page = response.xpath(
+            '//a[@class="js-page-link"]/@href'
+        ).get()
+
+        if next_page:
+            yield response.follow(next_page, callback=self.parse)
